@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { sheetRead, sheetAppend, sheetDeleteRow, sheetUpdateRow, initSheets, TABS } from "./sheets";
+import { sheetRead, sheetAppend, sheetDeleteRow, sheetUpdateRow, initSheets, TABS, setScriptUrl, APPS_SCRIPT_URL } from "./sheets";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const INCOME_TYPES = [
@@ -525,6 +525,26 @@ function AdminLogin({ onLogin, toast }) {
   );
 }
 
+// ─── SCRIPT URL SETUP ────────────────────────────────────────────────────────
+function ScriptUrlSetup({ toast }) {
+  const [url, setUrl] = useState(localStorage.getItem("ous_script_url") || "");
+  const [saved, setSaved] = useState(!!localStorage.getItem("ous_script_url"));
+  function save() {
+    if (!url.includes("script.google.com")) { toast("⚠️ Paste the correct Apps Script URL"); return; }
+    setScriptUrl(url); setSaved(true); toast("✅ Script URL saved! Writes now enabled.");
+  }
+  return (
+    <div style={{ ...S.card, border: saved ? `1.5px solid ${C.success}` : `1.5px solid ${C.gold}`, background: saved ? "#F0FFF4" : "#FFFBF0" }}>
+      <div style={{ fontWeight: 700, color: saved ? C.success : C.saffron, fontSize: 14, marginBottom: 8 }}>
+        {saved ? "✅ Write: Connected" : "⚙️ Enable Write to Google Sheets"}
+      </div>
+      {!saved // ─── ADMIN PORTAL ─────────────────────────────────────────────────────────────// ─── ADMIN PORTAL ───────────────────────────────────────────────────────────── <div style={{ fontSize: 12, color: C.muted, marginBottom: 10 }}>Paste your Apps Script deployment URL to enable saving data.</div>}
+      <input style={{ ...S.input, fontSize: 12 }} value={url} onChange={e => { setUrl(e.target.value); setSaved(false); }} placeholder="https://script.google.com/macros/s/..." />
+      <button style={S.btnPrimary} onClick={save}>{saved ? "🔄 Update URL" : "💾 Save & Enable Writes"}</button>
+    </div>
+  );
+}
+
 // ─── ADMIN PORTAL ─────────────────────────────────────────────────────────────
 function AdminPortal({ admin, onLogout, toast }) {
   const [tab, setTab] = useState("members");
@@ -653,14 +673,17 @@ function AdminPortal({ admin, onLogout, toast }) {
       )}
 
       {tab === "info" && (
-        <div style={S.card}>
-          <div style={S.sectionTitle}>ℹ️ Admin Guide</div>
-          <div style={{ fontSize: 13, color: "#444", lineHeight: 2 }}>
-            <div>• <strong>Club details</strong> — Edit from Home Page banner (✏️ Edit button)</div>
-            <div>• <strong>Finance entries</strong> — Events → Durga Puja 2026 → Finance tab</div>
-            <div>• <strong>Members</strong> — Manage here in Admin Portal</div>
-            <div>• <strong>All data</strong> — Saved live to Google Sheets (shared with all admins)</div>
-            <div>• <strong>Google Sheet</strong> — Check: <a href="https://docs.google.com/spreadsheets/d/1VAM7ajyEg7J99zbBScthfFkXyncdCZ29ceLSF6OZFqU" target="_blank" rel="noreferrer" style={{ color: C.saffron }}>OUS-Database ↗</a></div>
+        <div>
+          <ScriptUrlSetup toast={toast} />
+          <div style={S.card}>
+            <div style={S.sectionTitle}>ℹ️ Admin Guide</div>
+            <div style={{ fontSize: 13, color: "#444", lineHeight: 2 }}>
+              <div>• <strong>Club details</strong> — Edit from Home Page banner (✏️ Edit button)</div>
+              <div>• <strong>Finance entries</strong> — Events → Durga Puja 2026 → Finance tab</div>
+              <div>• <strong>Members</strong> — Manage here in Admin Portal</div>
+              <div>• <strong>All data</strong> — Saved live to Google Sheets (shared with all admins)</div>
+              <div>• <strong>Google Sheet</strong> — <a href="https://docs.google.com/spreadsheets/d/1VAM7ajyEg7J99zbBScthfFkXyncdCZ29ceLSF6OZFqU" target="_blank" rel="noreferrer" style={{ color: C.saffron }}>OUS-Database ↗</a></div>
+            </div>
           </div>
         </div>
       )}
