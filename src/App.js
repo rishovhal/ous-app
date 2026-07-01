@@ -1464,18 +1464,19 @@ export default function App() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 40,
-                height: 40,
+                width: 56,
+                height: 56,
+                overflow: "hidden"
               }}
             >
               <img
                 src={OUS_Logo}
                 alt="OUS Logo"
                 style={{
-                  width: 36,
-                  height: 36,
-                  objectFit: "contain",
-                  display: "block",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: "scale(2.5)"
                 }}
               />
           </span>
