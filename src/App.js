@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { sheetRead, sheetAppend, sheetDeleteRow, sheetUpdateRow, initSheets, TABS } from "./sheets";
 import { uploadPhotoToDrive, OAUTH_CLIENT_ID } from "./drive";
-import OUS_Logo from "./assets/OUS_Logo.png";
+import OUSLogo from "./assets/OUS_Logo.png";
 
 // ─── INCOME & EXPENSE TYPES ───────────────────────────────────────────────────
 const INCOME_TYPES = [
@@ -380,19 +380,7 @@ function HomePage({ isAdmin, setPage, toast }) {
       <div style={{ ...S.card, background:`linear-gradient(160deg,${C.darkBg} 0%,#3A0800 50%,#6B1000 100%)`, color:"#fff", textAlign:"center", position:"relative", padding:"22px 16px 18px" }}>
         {club?.photoUrl
           ? <img src={club.photoUrl} alt="Club" style={{ width:82,height:82,borderRadius:"50%",objectFit:"cover",border:`3px solid ${C.gold}`,marginBottom:10 }} />
-          : <div style={{ width:82,height:82,borderRadius:"50%",background:`linear-gradient(135deg,${C.saffron},${C.gold})`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px",fontSize:36,border:`3px solid ${C.gold}` }}>
-            <img 
-            src={OUS_Logo}
-            alt="OUS Logo"
-            style={{
-              width: 68,
-              height: 68,
-              objectFit: "contain",
-              verticalAlign: "middle",
-              marginRight: 6,
-            }}
-            />
-          </div>
+          : <div style={{ width:82,height:82,borderRadius:"50%",background:`linear-gradient(135deg,${C.saffron},${C.gold})`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px",fontSize:36,border:`3px solid ${C.gold}` }}>🪔</div>
         }
         <div style={{ fontFamily:"'Hind Siliguri',sans-serif",fontSize:22,fontWeight:700,color:C.gold }}>{club?.nameBn||"উদয় সংঘ ভাটপাড়া"}</div>
         <div style={{ fontSize:15,fontWeight:700,marginTop:2,opacity:0.95 }}>{club?.name||"Uday Sangha Bhatpara"}</div>
@@ -1446,41 +1434,22 @@ export default function App() {
           <div style={{ fontSize:11,opacity:0.75,marginTop:1 }}>{title.en}</div>
         </div>
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-          {adminUser ? (
-            <div style={{ display:"flex",alignItems:"center",gap:6 }}>
-              <div style={{ textAlign:"right" }}>
-                <div style={{ fontSize:10,color:C.gold,fontWeight:700,lineHeight:1 }}>ADMIN</div>
-                <div style={{ fontSize:11,color:"#fff",opacity:0.85,lineHeight:1.4 }}>{adminUser.name||adminUser.username}</div>
+          <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+            {/* Club Logo — fixed on every page */}
+            <img src={OUSLogo} alt="Uday Sangha" style={{ width:44, height:28, objectFit:"contain", filter:"drop-shadow(0 1px 3px rgba(0,0,0,0.4))" }} />
+            {adminUser && (
+              <div style={{ display:"flex",alignItems:"center",gap:6 }}>
+                <div style={{ textAlign:"right" }}>
+                  <div style={{ fontSize:10,color:C.gold,fontWeight:700,lineHeight:1 }}>ADMIN</div>
+                  <div style={{ fontSize:11,color:"#fff",opacity:0.85,lineHeight:1.4,maxWidth:70,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{adminUser.name||adminUser.username}</div>
+                </div>
+                <button onClick={()=>setAdminUser(null)}
+                  style={{ background:"rgba(255,255,255,0.12)",border:"1px solid rgba(255,255,255,0.25)",color:"#fff",borderRadius:7,padding:"5px 9px",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap" }}>
+                  ↩️ Out
+                </button>
               </div>
-              <button onClick={()=>setAdminUser(null)}
-                style={{ background:"rgba(255,255,255,0.12)",border:"1px solid rgba(255,255,255,0.25)",color:"#fff",borderRadius:7,padding:"5px 9px",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap" }}>
-                ↩️ Logout
-              </button>
-            </div>
-          ) : (
-            /* HEADER ICON — change the emoji below or replace with <img src="..." style={{width:28,height:28}} /> */
-            <span
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 52,
-                    height: 52,
-                    flexShrink: 0,
-                  }}
-                >
-                 <img
-                  src={OUS_Logo}
-                  alt="OUS Logo"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    display: "block",
-                  }}
-                />
-          </span>
-          )}
+            )}
+          </div>
         </div>
       </div>
       <div style={{ height:"calc(100vh - 58px)",overflowY:"auto" }}>{renderPage()}</div>
