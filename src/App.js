@@ -713,37 +713,81 @@ function DurgaPujaPage({ isAdmin, onBack, toast }) {
 function EventsPage({ isAdmin, setSubPage, toast }) {
   const [events,  setEvents]  = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const EVENT_TYPES = ["Durga Puja","Kali Puja","Holi","Annual Picnic","NabaBarsha","Other"];
+  const blank = { name:"", nameBn:"", type:EVENT_TYPES[0], year:new Date().getFullYear().toString(), status:"upcoming", dateFrom:"", dateTo:"", venue:"", description:"", bankAccount:"", bankName:"", notes:"" };
+  const [form, setForm] = useState(blank);
 
   useEffect(()=>{
     sheetRead(TABS.EVENTS).then(setEvents).catch(()=>toast("⚠️ Could not load events.")).finally(()=>setLoading(false));
   },[]);
 
-  const OTHER = ["Kali Puja","Holi","Annual Picnic","NabaBarsha"];
+  async function addEvent() {
+    if (!form.name||!form.dateFrom) { toast("⚠️ Name & Start Date required"); return; }
+    setSaving(true);
+    try {
+      const row = { id:"EVT"+uid(), ...form };
+      await sheetAppend(TABS.EVENTS, row);
+      setEvents(p=>[...p,row]); setShowAdd(false); setForm(blank);
+      toast("✅ Event added!");
+    } catch(e) { toast("❌ "+e.message); }
+    setSaving(false);
+  }
+
   if (loading) return <div style={S.page}><Spinner /></div>;
 
   return (
     <div style={S.page}>
-      <div style={S.secTitle}>🎉 Events / উৎসব</div>
+      <div style={{ ...S.btwn, marginBottom:12 }}>
+        <div style={S.secTitle}>🎉 Events / উৎসব</div>
+        {isAdmin && <button style={S.btnSm()} onClick={()=>{setForm(blank);setShowAdd(true);}}>➕ Add Event</button>}
+      </div>
       {events.map(ev=>(
-        <div key={ev.id} style={{ ...S.card,cursor:ev.id==="durga2026"?"pointer":"default" }}
+        <div key={ev.id} style={{ ...S.card, cursor:"pointer" }}
           onClick={()=>ev.id==="durga2026"&&setSubPage("durga2026")}>
           <div style={S.btwn}>
             <div>
-              <div style={{ fontFamily:"'Hind Siliguri',sans-serif",fontWeight:700,color:C.deepRed,fontSize:15 }}>{ev.nameBn}</div>
+              <div style={{ fontFamily:"'Hind Siliguri',sans-serif",fontWeight:700,color:C.deepRed,fontSize:15 }}>{ev.nameBn||ev.name}</div>
               <div style={{ fontSize:12,color:C.muted }}>{ev.name}</div>
             </div>
-            <span style={S.badge(ev.status==="upcoming"?"#27AE60":C.saffron)}>{ev.status==="upcoming"?"✨ Upcoming":"Past"}</span>
+            <span style={S.badge(ev.status==="upcoming"?"#27AE60":C.saffron)}>{ev.status==="upcoming"?"✨ Upcoming":"✔ Past"}</span>
           </div>
-          <div style={{ fontSize:12,color:C.muted,marginTop:6 }}>📅 {ev.dateFrom} | 📍 {ev.venue}</div>
+          <div style={{ fontSize:12,color:C.muted,marginTop:6 }}>📅 {ev.dateFrom}{ev.dateTo?" → "+ev.dateTo:""} | 📍 {ev.venue}</div>
           {ev.id==="durga2026"&&<div style={{ fontSize:12,color:C.saffron,marginTop:4,fontWeight:600 }}>Tap to view details, finance & photos →</div>}
         </div>
       ))}
-      <div style={{ ...S.card,border:`2px dashed ${C.border}`,background:"transparent",textAlign:"center",color:C.muted }}>
-        <div style={{ fontSize:32,marginBottom:8 }}>🗓️</div>
-        <strong>More Events Being Added</strong>
-        <div style={{ marginTop:8 }}>{OTHER.map(t=><span key={t} style={S.tag}>{t}</span>)}</div>
-        <div style={{ fontSize:11,marginTop:8 }}>Admin can add new events from Admin Portal.</div>
-      </div>
+
+      <Modal open={showAdd} onClose={()=>setShowAdd(false)} title="🎉 Add New Event">
+        <label style={S.label}>Event Name (English) *</label>
+        <input style={S.input} value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="e.g. Kali Puja 2026" />
+        <label style={S.label}>Event Name (Bengali)</label>
+        <input style={S.input} value={form.nameBn} onChange={e=>setForm({...form,nameBn:e.target.value})} placeholder="e.g. কালী পূজা ২০২৬" />
+        <label style={S.label}>Event Type</label>
+        <select style={S.select} value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
+          {EVENT_TYPES.map(t=><option key={t}>{t}</option>)}
+        </select>
+        <label style={S.label}>Year</label>
+        <input style={S.input} value={form.year} onChange={e=>setForm({...form,year:e.target.value})} placeholder="2026" />
+        <label style={S.label}>Status</label>
+        <select style={S.select} value={form.status} onChange={e=>setForm({...form,status:e.target.value})}>
+          <option value="upcoming">Upcoming</option>
+          <option value="past">Past</option>
+        </select>
+        <label style={S.label}>Start Date *</label>
+        <input style={S.input} type="date" value={form.dateFrom} onChange={e=>setForm({...form,dateFrom:e.target.value})} />
+        <label style={S.label}>End Date</label>
+        <input style={S.input} type="date" value={form.dateTo} onChange={e=>setForm({...form,dateTo:e.target.value})} />
+        <label style={S.label}>Venue</label>
+        <input style={S.input} value={form.venue} onChange={e=>setForm({...form,venue:e.target.value})} placeholder="Club Pandal, Bhatpara" />
+        <label style={S.label}>Description</label>
+        <textarea style={S.textarea} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} />
+        <label style={S.label}>Bank Name</label>
+        <input style={S.input} value={form.bankName} onChange={e=>setForm({...form,bankName:e.target.value})} />
+        <label style={S.label}>Bank Account No.</label>
+        <input style={S.input} value={form.bankAccount} onChange={e=>setForm({...form,bankAccount:e.target.value})} />
+        <button style={S.btnPrimary} onClick={addEvent} disabled={saving}>{saving?"Saving...":"💾 Save Event"}</button>
+      </Modal>
     </div>
   );
 }
@@ -971,6 +1015,350 @@ function AdminPortal({ admin, onLogout, toast, setPage, setSubPage }) {
   );
 }
 
+// ─── MEMBERS PAGE (public view) ──────────────────────────────────────────────
+function MembersPage({ isAdmin, toast }) {
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const blank = { name:"", nameBn:"", phone:"", email:"", address:"", joinDate:"", memberType:"General" };
+  const [form, setForm] = useState(blank);
+
+  useEffect(()=>{
+    sheetRead(TABS.MEMBERS).then(setMembers).catch(()=>toast("⚠️ Could not load members.")).finally(()=>setLoading(false));
+  },[]);
+
+  async function addMember() {
+    if (!form.name) { toast("⚠️ Name required"); return; }
+    setSaving(true);
+    try {
+      const row = { id:"MBR"+uid(), ...form, createdAt: new Date().toISOString().split("T")[0] };
+      await sheetAppend(TABS.MEMBERS, row);
+      setMembers(p=>[...p,row]); setShowAdd(false); setForm(blank);
+      toast("✅ Member added!");
+    } catch(e) { toast("❌ "+e.message); }
+    setSaving(false);
+  }
+
+  async function delMember(id) {
+    if (!window.confirm("Delete this member?")) return;
+    try { await sheetDeleteRow(TABS.MEMBERS,id); setMembers(p=>p.filter(m=>m.id!==id)); toast("Deleted."); }
+    catch { toast("❌ Delete failed."); }
+  }
+
+  const types = ["General","Life","Honorary","Youth","Patron"];
+  if (loading) return <div style={S.page}><Spinner /></div>;
+
+  return (
+    <div style={S.page}>
+      <div style={{ ...S.btwn, marginBottom:12 }}>
+        <div style={S.secTitle}>👥 Members / সদস্য ({members.length})</div>
+        {isAdmin && <button style={S.btnSm()} onClick={()=>{setForm(blank);setShowAdd(true);}}>➕ Add</button>}
+      </div>
+      {members.length===0 && <div style={{ ...S.card, textAlign:"center", color:C.muted, padding:30 }}>No members yet.</div>}
+      {members.map(m=>(
+        <div key={m.id} style={S.card}>
+          <div style={S.btwn}>
+            <div>
+              <div style={{ fontWeight:700, color:C.deepRed }}>{m.name}</div>
+              {m.nameBn && <div style={{ fontFamily:"'Hind Siliguri',sans-serif", fontSize:12, color:C.muted }}>{m.nameBn}</div>}
+            </div>
+            <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+              <span style={S.badge(C.saffron)}>{m.id}</span>
+              {isAdmin && <button onClick={()=>delMember(m.id)} style={{ background:"none",border:"none",color:C.danger,cursor:"pointer",fontSize:18 }}>🗑</button>}
+            </div>
+          </div>
+          <div style={{ fontSize:11, color:C.muted, marginTop:5 }}>
+            {m.phone && <span>📞 {m.phone} &nbsp;</span>}
+            <span style={S.tag}>{m.memberType||"General"}</span>
+            {m.joinDate && <span>📅 {m.joinDate}</span>}
+          </div>
+          {m.address && <div style={{ fontSize:11, color:C.muted }}>📍 {m.address}</div>}
+        </div>
+      ))}
+      <Modal open={showAdd} onClose={()=>setShowAdd(false)} title="👤 Add New Member">
+        {[["name","Full Name *"],["nameBn","Bengali Name"],["phone","Phone"],["email","Email"],["address","Address"],["joinDate","Join Date"]].map(([f,l])=>(
+          <div key={f}><label style={S.label}>{l}</label><input style={S.input} type={f==="joinDate"?"date":"text"} value={form[f]||""} onChange={e=>setForm({...form,[f]:e.target.value})} /></div>
+        ))}
+        <label style={S.label}>Member Type</label>
+        <select style={S.select} value={form.memberType} onChange={e=>setForm({...form,memberType:e.target.value})}>
+          {types.map(t=><option key={t}>{t}</option>)}
+        </select>
+        <button style={S.btnPrimary} onClick={addMember} disabled={saving}>{saving?"Saving...":"💾 Save Member"}</button>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── MEETINGS PAGE ────────────────────────────────────────────────────────────
+function MeetingsPage({ isAdmin, toast }) {
+  const [meetings, setMeetings] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [showAdd,  setShowAdd]  = useState(false);
+  const [saving,   setSaving]   = useState(false);
+  const blank = { title:"", date:"", attendees:"", agenda:"", discussion:"", decisions:"", nextMeeting:"" };
+  const [form, setForm] = useState(blank);
+  const [expanded, setExpanded] = useState(null);
+
+  useEffect(()=>{
+    sheetRead(TABS.MEETINGS).then(setMeetings).catch(()=>toast("⚠️ Could not load meetings.")).finally(()=>setLoading(false));
+  },[]);
+
+  async function addMeeting() {
+    if (!form.title||!form.date) { toast("⚠️ Title & Date required"); return; }
+    setSaving(true);
+    try {
+      const row = { id:"MTG"+uid(), ...form, createdAt: new Date().toISOString().split("T")[0] };
+      await sheetAppend(TABS.MEETINGS, row);
+      setMeetings(p=>[...p,row]); setShowAdd(false); setForm(blank);
+      toast("✅ Meeting added!");
+    } catch(e) { toast("❌ "+e.message); }
+    setSaving(false);
+  }
+
+  async function delMeeting(id) {
+    if (!window.confirm("Delete this meeting record?")) return;
+    try { await sheetDeleteRow(TABS.MEETINGS,id); setMeetings(p=>p.filter(m=>m.id!==id)); toast("Deleted."); }
+    catch { toast("❌ Delete failed."); }
+  }
+
+  if (loading) return <div style={S.page}><Spinner /></div>;
+
+  return (
+    <div style={S.page}>
+      <div style={{ ...S.btwn, marginBottom:12 }}>
+        <div style={S.secTitle}>📋 Meetings / সভা ({meetings.length})</div>
+        {isAdmin && <button style={S.btnSm()} onClick={()=>{setForm(blank);setShowAdd(true);}}>➕ Add MoM</button>}
+      </div>
+      {meetings.length===0 && <div style={{ ...S.card, textAlign:"center", color:C.muted, padding:30 }}>No meeting records yet.{isAdmin?" Tap ➕ to add.":""}</div>}
+      {[...meetings].reverse().map(m=>(
+        <div key={m.id} style={S.card}>
+          <div style={S.btwn} onClick={()=>setExpanded(expanded===m.id?null:m.id)}>
+            <div>
+              <div style={{ fontWeight:700, color:C.deepRed }}>{m.title}</div>
+              <div style={{ fontSize:12, color:C.muted }}>📅 {m.date}</div>
+            </div>
+            <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+              <span style={{ color:C.saffron, fontSize:18 }}>{expanded===m.id?"▲":"▼"}</span>
+              {isAdmin && <button onClick={e=>{e.stopPropagation();delMeeting(m.id);}} style={{ background:"none",border:"none",color:C.danger,cursor:"pointer",fontSize:18 }}>🗑</button>}
+            </div>
+          </div>
+          {expanded===m.id && (
+            <div style={{ marginTop:10, fontSize:13, color:"#444", lineHeight:1.8 }}>
+              {m.attendees  && <div><strong>Attendees:</strong> {m.attendees}</div>}
+              {m.agenda     && <div><strong>Agenda:</strong> {m.agenda}</div>}
+              {m.discussion && <div><strong>Discussion:</strong> {m.discussion}</div>}
+              {m.decisions  && <div><strong>Decisions:</strong> {m.decisions}</div>}
+              {m.nextMeeting&& <div><strong>Next Meeting:</strong> {m.nextMeeting}</div>}
+            </div>
+          )}
+        </div>
+      ))}
+      <Modal open={showAdd} onClose={()=>setShowAdd(false)} title="📋 Add Meeting Record (MoM)">
+        <label style={S.label}>Meeting Title *</label>
+        <input style={S.input} value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="e.g. Monthly Committee Meeting" />
+        <label style={S.label}>Date *</label>
+        <input style={S.input} type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} />
+        <label style={S.label}>Attendees</label>
+        <input style={S.input} value={form.attendees} onChange={e=>setForm({...form,attendees:e.target.value})} placeholder="Names separated by commas..." />
+        <label style={S.label}>Agenda</label>
+        <textarea style={S.textarea} value={form.agenda} onChange={e=>setForm({...form,agenda:e.target.value})} placeholder="Topics discussed..." />
+        <label style={S.label}>Discussion Points</label>
+        <textarea style={S.textarea} value={form.discussion} onChange={e=>setForm({...form,discussion:e.target.value})} placeholder="Key discussion points..." />
+        <label style={S.label}>Decisions Taken</label>
+        <textarea style={S.textarea} value={form.decisions} onChange={e=>setForm({...form,decisions:e.target.value})} placeholder="Decisions and action items..." />
+        <label style={S.label}>Next Meeting Date</label>
+        <input style={S.input} type="date" value={form.nextMeeting} onChange={e=>setForm({...form,nextMeeting:e.target.value})} />
+        <button style={S.btnPrimary} onClick={addMeeting} disabled={saving}>{saving?"Saving...":"💾 Save Meeting Record"}</button>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── GENERAL FINANCE PAGE ─────────────────────────────────────────────────────
+function GeneralFinancePage({ isAdmin, toast }) {
+  const [records,  setRecords]  = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [activeTab,setActiveTab]= useState("membership");
+  const [showAdd,  setShowAdd]  = useState(false);
+  const [saving,   setSaving]   = useState(false);
+  const blank = { category:"membership", subType:"Monthly Fee", month:"", year:new Date().getFullYear().toString(), amount:"", description:"", paidBy:"" };
+  const [form, setForm] = useState(blank);
+
+  const MEMBERSHIP_TYPES = ["Monthly Fee","Annual Fee","Joining Fee","Renewal Fee","Arrears"];
+  const BUSINESS_IN  = ["Rental Income","Sponsorship","Donation","Grant","Other Income"];
+  const BUSINESS_EXP = ["Maintenance","Utilities","Printing","Stationery","Office Expense","Bank Charges","Other Expense"];
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  useEffect(()=>{
+    sheetRead(TABS.GENERAL_FINANCE).then(setRecords).catch(()=>toast("⚠️ Could not load.")).finally(()=>setLoading(false));
+  },[]);
+
+  async function addRecord() {
+    if (!form.amount) { toast("⚠️ Amount required"); return; }
+    setSaving(true);
+    try {
+      const row = { id:"GF"+uid(), ...form, createdAt: new Date().toISOString().split("T")[0] };
+      await sheetAppend(TABS.GENERAL_FINANCE, row);
+      setRecords(p=>[...p,row]); setShowAdd(false); setForm(blank);
+      toast("✅ Record saved!");
+    } catch(e) { toast("❌ "+e.message); }
+    setSaving(false);
+  }
+
+  async function delRecord(id) {
+    if (!window.confirm("Delete this record?")) return;
+    try { await sheetDeleteRow(TABS.GENERAL_FINANCE,id); setRecords(p=>p.filter(r=>r.id!==id)); toast("Deleted."); }
+    catch { toast("❌ Delete failed."); }
+  }
+
+  const membership  = records.filter(r=>r.category==="membership");
+  const bizIncome   = records.filter(r=>r.category==="biz_income");
+  const bizExpense  = records.filter(r=>r.category==="biz_expense");
+  const totalMemFee = sum(membership,"amount");
+  const totalBizIn  = sum(bizIncome,"amount");
+  const totalBizExp = sum(bizExpense,"amount");
+  const netBiz      = totalBizIn - totalBizExp;
+
+  if (!isAdmin) return (
+    <div style={{ ...S.page, ...S.stub }}>
+      <div style={{ fontSize:48 }}>🔒</div>
+      <div style={{ fontWeight:700, color:C.deepRed, fontSize:16, marginTop:12 }}>Admin Access Only</div>
+      <div style={{ fontSize:13, color:C.muted, marginTop:6 }}>Financial records are visible to admins only.</div>
+    </div>
+  );
+
+  if (loading) return <div style={S.page}><Spinner /></div>;
+
+  const tabs = [["membership","💳 Membership"],["business","🏢 Business"]];
+
+  return (
+    <div style={S.page}>
+      <div style={{ ...S.btwn, marginBottom:12 }}>
+        <div style={S.secTitle}>💰 General Finance</div>
+        <button style={S.btnSm()} onClick={()=>{setForm(blank);setShowAdd(true);}}>➕ Add</button>
+      </div>
+
+      {/* Summary */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:12 }}>
+        {[{l:"Membership",v:totalMemFee,c:C.success},{l:"Biz Income",v:totalBizIn,c:C.success},{l:"Biz Expense",v:totalBizExp,c:C.danger}].map(x=>(
+          <div key={x.l} style={{ background:"#fff",borderRadius:10,padding:10,border:`1px solid ${x.c}44`,textAlign:"center" }}>
+            <div style={{ fontSize:10,color:C.muted,marginBottom:3 }}>{x.l}</div>
+            <div style={{ fontSize:14,fontWeight:800,color:x.c }}>₹{fmt(x.v)}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display:"flex",background:"#fff",borderRadius:10,overflow:"hidden",border:`1px solid ${C.border}`,marginBottom:12 }}>
+        {tabs.map(([key,label])=>(
+          <button key={key} onClick={()=>setActiveTab(key)}
+            style={{ flex:1,padding:"11px 0",border:"none",background:activeTab===key?C.deepRed:"transparent",color:activeTab===key?"#fff":C.muted,fontWeight:activeTab===key?700:400,cursor:"pointer",fontSize:12 }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab==="membership" && (
+        <div style={S.card}>
+          <div style={S.secTitle}>💳 Membership Fees</div>
+          {membership.length===0 && <div style={{ color:C.muted,fontSize:13,textAlign:"center",padding:16 }}>No membership fee records yet.</div>}
+          {membership.map(r=>(
+            <div key={r.id} style={{ background:"#F0FFF4",borderRadius:8,padding:10,marginBottom:8,border:`1px solid ${C.success}33` }}>
+              <div style={S.btwn}>
+                <span style={S.tag}>{r.subType}</span>
+                <div style={{ display:"flex",gap:6,alignItems:"center" }}>
+                  <span style={{ ...S.green,fontSize:15 }}>₹{fmt(r.amount)}</span>
+                  <button onClick={()=>delRecord(r.id)} style={{ background:"none",border:"none",color:C.danger,cursor:"pointer",fontSize:16 }}>🗑</button>
+                </div>
+              </div>
+              <div style={{ fontSize:11,color:C.muted,marginTop:4 }}>
+                {r.month && <span>📅 {r.month} {r.year} &nbsp;</span>}
+                {r.paidBy && <span>👤 {r.paidBy}</span>}
+              </div>
+              {r.description && <div style={{ fontSize:11,color:"#555",marginTop:3 }}>📝 {r.description}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab==="business" && (
+        <>
+          <div style={S.card}>
+            <div style={S.secTitle}>📈 Business Income</div>
+            {bizIncome.length===0 && <div style={{ color:C.muted,fontSize:13,textAlign:"center",padding:10 }}>No business income records.</div>}
+            {bizIncome.map(r=>(
+              <div key={r.id} style={{ background:"#F0FFF4",borderRadius:8,padding:10,marginBottom:8,border:`1px solid ${C.success}33` }}>
+                <div style={S.btwn}>
+                  <span style={S.tag}>{r.subType}</span>
+                  <div style={{ display:"flex",gap:6,alignItems:"center" }}>
+                    <span style={{ ...S.green,fontSize:15 }}>₹{fmt(r.amount)}</span>
+                    <button onClick={()=>delRecord(r.id)} style={{ background:"none",border:"none",color:C.danger,cursor:"pointer",fontSize:16 }}>🗑</button>
+                  </div>
+                </div>
+                {r.description && <div style={{ fontSize:11,color:"#555",marginTop:3 }}>📝 {r.description}</div>}
+                <div style={{ fontSize:11,color:C.muted }}>📅 {r.month} {r.year}</div>
+              </div>
+            ))}
+          </div>
+          <div style={S.card}>
+            <div style={{ ...S.btwn,marginBottom:8 }}>
+              <div style={S.secTitle}>📉 Business Expense</div>
+              <div style={{ ...S.red,fontSize:14 }}>Net: ₹{fmt(netBiz)}</div>
+            </div>
+            {bizExpense.length===0 && <div style={{ color:C.muted,fontSize:13,textAlign:"center",padding:10 }}>No business expense records.</div>}
+            {bizExpense.map(r=>(
+              <div key={r.id} style={{ background:"#FFF5F5",borderRadius:8,padding:10,marginBottom:8,border:`1px solid ${C.danger}33` }}>
+                <div style={S.btwn}>
+                  <span style={S.tag}>{r.subType}</span>
+                  <div style={{ display:"flex",gap:6,alignItems:"center" }}>
+                    <span style={{ ...S.red,fontSize:15 }}>₹{fmt(r.amount)}</span>
+                    <button onClick={()=>delRecord(r.id)} style={{ background:"none",border:"none",color:C.danger,cursor:"pointer",fontSize:16 }}>🗑</button>
+                  </div>
+                </div>
+                {r.description && <div style={{ fontSize:11,color:"#555",marginTop:3 }}>📝 {r.description}</div>}
+                <div style={{ fontSize:11,color:C.muted }}>📅 {r.month} {r.year}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Add Record Modal */}
+      <Modal open={showAdd} onClose={()=>setShowAdd(false)} title="➕ Add Finance Record">
+        <label style={S.label}>Category</label>
+        <select style={S.select} value={form.category} onChange={e=>setForm({...form,category:e.target.value,subType:e.target.value==="membership"?MEMBERSHIP_TYPES[0]:e.target.value==="biz_income"?BUSINESS_IN[0]:BUSINESS_EXP[0]})}>
+          <option value="membership">💳 Membership Fee</option>
+          <option value="biz_income">📈 Business Income</option>
+          <option value="biz_expense">📉 Business Expense</option>
+        </select>
+        <label style={S.label}>Sub Type</label>
+        <select style={S.select} value={form.subType} onChange={e=>setForm({...form,subType:e.target.value})}>
+          {(form.category==="membership"?MEMBERSHIP_TYPES:form.category==="biz_income"?BUSINESS_IN:BUSINESS_EXP).map(t=><option key={t}>{t}</option>)}
+        </select>
+        <label style={S.label}>Amount (₹) *</label>
+        <input style={S.input} type="number" min="0" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0" />
+        <label style={S.label}>Month</label>
+        <select style={S.select} value={form.month} onChange={e=>setForm({...form,month:e.target.value})}>
+          <option value="">-- Select Month --</option>
+          {MONTHS.map(m=><option key={m}>{m}</option>)}
+        </select>
+        <label style={S.label}>Year</label>
+        <input style={S.input} value={form.year} onChange={e=>setForm({...form,year:e.target.value})} placeholder="2026" />
+        {form.category==="membership" && (
+          <>
+            <label style={S.label}>Paid By (Member Name)</label>
+            <input style={S.input} value={form.paidBy} onChange={e=>setForm({...form,paidBy:e.target.value})} placeholder="Member name..." />
+          </>
+        )}
+        <label style={S.label}>Description / Notes</label>
+        <textarea style={S.textarea} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Any additional details..." />
+        <button style={S.btnPrimary} onClick={addRecord} disabled={saving}>{saving?"Saving...":"💾 Save Record"}</button>
+      </Modal>
+    </div>
+  );
+}
+
 // ─── STUB PAGES ───────────────────────────────────────────────────────────────
 function StubPage({ icon, en, bn, desc }) {
   return (
@@ -1001,19 +1389,22 @@ export default function App() {
   function handleNav(key){setPage(key);setSubPage(null);}
 
   const navItems=[
-    {key:"home",icon:"🏠",label:"Home"},
-    {key:"events",icon:"🎉",label:"Events"},
-    {key:"meetings",icon:"📋",label:"Meetings"},
-    {key:"activities",icon:"🎭",label:"Activities"},
-    {key:"admin",icon:"🔐",label:"Admin"},
+    {key:"home",     icon:"🏠",label:"Home"},
+    {key:"events",   icon:"🎉",label:"Events"},
+    {key:"members",  icon:"👥",label:"Members"},
+    {key:"meetings", icon:"📋",label:"Meetings"},
+    {key:"finance",  icon:"💰",label:"Finance"},
+    {key:"admin",    icon:"🔐",label:"Admin"},
   ];
 
   const titles={
-    home:{en:"One Uday Sangha",bn:"উদয় সংঘ"},
-    events:{en:"Events",bn:"উৎসব"},
-    meetings:{en:"Meetings",bn:"সভা"},
-    activities:{en:"Activities",bn:"কার্যক্রম"},
-    admin:{en:"Admin Portal",bn:"অ্যাডমিন"},
+    home:     {en:"One Uday Sangha",bn:"উদয় সংঘ"},
+    events:   {en:"Events",         bn:"উৎসব"},
+    members:  {en:"Members",        bn:"সদস্য"},
+    meetings: {en:"Meetings",       bn:"সভা"},
+    finance:  {en:"General Finance",bn:"সাধারণ অর্থ"},
+    activities:{en:"Activities",    bn:"কার্যক্রম"},
+    admin:    {en:"Admin Portal",   bn:"অ্যাডমিন"},
   };
   const title=titles[page]||titles.home;
 
@@ -1024,7 +1415,9 @@ export default function App() {
       if(subPage==="durga2026") return <DurgaPujaPage isAdmin={!!adminUser} onBack={()=>setSubPage(null)} toast={toast} />;
       return <EventsPage isAdmin={!!adminUser} setSubPage={setSubPage} toast={toast} />;
     }
-    if(page==="meetings") return <StubPage icon="📋" en="Meetings History" bn="সভার ইতিহাস" desc="Meeting notes, attendees & minutes. Coming soon." />;
+    if(page==="members")   return <MembersPage isAdmin={!!adminUser} toast={toast} />;
+    if(page==="meetings")  return <MeetingsPage isAdmin={!!adminUser} toast={toast} />;
+    if(page==="finance")   return <GeneralFinancePage isAdmin={!!adminUser} toast={toast} />;
     if(page==="activities") return <StubPage icon="🎭" en="Club Activities" bn="ক্লাব কার্যক্রম" desc="Sports, cultural programs & community activities. Coming soon." />;
     if(page==="admin"){
       if(!adminUser) return <AdminLogin onLogin={setAdminUser} toast={toast} />;
@@ -1052,6 +1445,7 @@ export default function App() {
               </button>
             </div>
           ) : (
+            /* HEADER ICON — change the emoji below or replace with <img src="..." style={{width:28,height:28}} /> */
             <span style={{ fontSize:24 }}>🪔</span>
           )}
         </div>
