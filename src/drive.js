@@ -11,7 +11,7 @@
 //      e.g. https://yourusername.github.io
 //   5. Copy the Client ID and paste below
 
-export const OAUTH_CLIENT_ID = "443989182941-ofuv0fiuavn8l6lbf6vl41jtampd3m60.apps.googleusercontent.com";
+export const OAUTH_CLIENT_ID = "PASTE_YOUR_OAUTH_CLIENT_ID_HERE";
 
 // Root folder name in Google Drive
 const ROOT_FOLDER = "OUS-Photos";

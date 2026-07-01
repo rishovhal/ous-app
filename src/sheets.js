@@ -8,7 +8,7 @@ const GBASE = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`;
 export const TABS = {
   CLUB: "Club", ADMINS: "Admins", MEMBERS: "Members",
   EVENTS: "Events", INCOMES: "Incomes", EXPENSES: "Expenses",
-  PHOTOS: "Photos",
+  PHOTOS: "Photos", MEETINGS: "Meetings", GENERAL_FINANCE: "GeneralFinance",
 };
 
 // ─── READ via Google Sheets API ───────────────────────────────────────────────
