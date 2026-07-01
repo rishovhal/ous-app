@@ -1460,25 +1460,25 @@ export default function App() {
           ) : (
             /* HEADER ICON — change the emoji below or replace with <img src="..." style={{width:28,height:28}} /> */
             <span
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 56,
-                height: 56,
-                overflow: "hidden"
-              }}
-            >
-              <img
-                src={OUS_Logo}
-                alt="OUS Logo"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  transform: "scale(2.5)"
-                }}
-              />
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 52,
+                    height: 52,
+                    flexShrink: 0,
+                  }}
+                >
+                 <img
+                  src={OUS_Logo}
+                  alt="OUS Logo"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
           </span>
           )}
         </div>
