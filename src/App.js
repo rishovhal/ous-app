@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { sheetRead, sheetAppend, sheetDeleteRow, sheetUpdateRow, initSheets, TABS } from "./sheets";
 import { uploadPhotoToDrive, OAUTH_CLIENT_ID } from "./drive";
-import { OUS_Logo } from "./assets/OUS_Logo.png";
+import OUS_Logo from "./assets/OUS_Logo.png";
 
 // ─── INCOME & EXPENSE TYPES ───────────────────────────────────────────────────
 const INCOME_TYPES = [
