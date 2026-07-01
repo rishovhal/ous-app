@@ -1,11 +1,11 @@
 {
   "files": {
-    "main.js": "./static/js/main.ebc7c375.js",
-    "static/media/OUS_Logo.png": "./static/media/OUS_Logo.65cb677683a4ec22ba14.png",
+    "main.js": "./static/js/main.afa71fe3.js",
+    "static/media/OUS_Logo.png": "./static/media/OUS_Logo.02a9f9f6a5ac7b752e99.png",
     "index.html": "./index.html",
-    "main.ebc7c375.js.map": "./static/js/main.ebc7c375.js.map"
+    "main.afa71fe3.js.map": "./static/js/main.afa71fe3.js.map"
   },
   "entrypoints": [
-    "static/js/main.ebc7c375.js"
+    "static/js/main.afa71fe3.js"
   ]
 }
