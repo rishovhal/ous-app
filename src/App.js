@@ -1446,7 +1446,7 @@ export default function App() {
             </div>
           ) : (
             /* HEADER ICON — change the emoji below or replace with <img src="..." style={{width:28,height:28}} /> */
-            <span style={{ fontSize:24 }}>🪔</span>
+            <span style={{ fontSize:24 }}><img src="https://drive.google.com/file/d/1M3-Idf037g72Z_wWYvjJAs9yIr0ncPAN/view?usp=drive_link" style={{width:28,height:28}} /></span>
           )}
         </div>
       </div>
