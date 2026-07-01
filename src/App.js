@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { sheetRead, sheetAppend, sheetDeleteRow, sheetUpdateRow, initSheets, TABS } from "./sheets";
 import { uploadPhotoToDrive, OAUTH_CLIENT_ID } from "./drive";
+import { OUS_Logo } from "./assets/OUS_Logo.png";
 
 // ─── INCOME & EXPENSE TYPES ───────────────────────────────────────────────────
 const INCOME_TYPES = [
@@ -379,7 +380,19 @@ function HomePage({ isAdmin, setPage, toast }) {
       <div style={{ ...S.card, background:`linear-gradient(160deg,${C.darkBg} 0%,#3A0800 50%,#6B1000 100%)`, color:"#fff", textAlign:"center", position:"relative", padding:"22px 16px 18px" }}>
         {club?.photoUrl
           ? <img src={club.photoUrl} alt="Club" style={{ width:82,height:82,borderRadius:"50%",objectFit:"cover",border:`3px solid ${C.gold}`,marginBottom:10 }} />
-          : <div style={{ width:82,height:82,borderRadius:"50%",background:`linear-gradient(135deg,${C.saffron},${C.gold})`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px",fontSize:36,border:`3px solid ${C.gold}` }}>🪔</div>
+          : <div style={{ width:82,height:82,borderRadius:"50%",background:`linear-gradient(135deg,${C.saffron},${C.gold})`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px",fontSize:36,border:`3px solid ${C.gold}` }}>
+            <img 
+            src={OUS_Logo}
+            alt="OUS Logo"
+            style={{
+              width: 20,
+              height: 20,
+              objectFit: "contain",
+              verticalAlign: "middle",
+              marginRight: 6,
+            }}
+            />
+          </div>
         }
         <div style={{ fontFamily:"'Hind Siliguri',sans-serif",fontSize:22,fontWeight:700,color:C.gold }}>{club?.nameBn||"উদয় সংঘ ভাটপাড়া"}</div>
         <div style={{ fontSize:15,fontWeight:700,marginTop:2,opacity:0.95 }}>{club?.name||"Uday Sangha Bhatpara"}</div>
@@ -1446,7 +1459,17 @@ export default function App() {
             </div>
           ) : (
             /* HEADER ICON — change the emoji below or replace with <img src="..." style={{width:28,height:28}} /> */
-            <span style={{ fontSize:24 }}><img src="https://drive.google.com/file/d/1M3-Idf037g72Z_wWYvjJAs9yIr0ncPAN/view?usp=drive_link" style={{width:28,height:28}} /></span>
+            <span style={{ fontSize:24 }}> <img 
+            src={OUS_Logo}
+            alt="OUS Logo"
+            style={{
+              width: 20,
+              height: 20,
+              objectFit: "contain",
+              verticalAlign: "middle",
+              marginRight: 6,
+            }}
+            /></span>
           )}
         </div>
       </div>
