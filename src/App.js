@@ -385,8 +385,8 @@ function HomePage({ isAdmin, setPage, toast }) {
             src={OUS_Logo}
             alt="OUS Logo"
             style={{
-              width: 20,
-              height: 20,
+              width: 68,
+              height: 68,
               objectFit: "contain",
               verticalAlign: "middle",
               marginRight: 6,
@@ -1459,17 +1459,26 @@ export default function App() {
             </div>
           ) : (
             /* HEADER ICON — change the emoji below or replace with <img src="..." style={{width:28,height:28}} /> */
-            <span style={{ fontSize:24 }}> <img 
-            src={OUS_Logo}
-            alt="OUS Logo"
-            style={{
-              width: 20,
-              height: 20,
-              objectFit: "contain",
-              verticalAlign: "middle",
-              marginRight: 6,
-            }}
-            /></span>
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 40,
+                height: 40,
+              }}
+            >
+              <img
+                src={OUS_Logo}
+                alt="OUS Logo"
+                style={{
+                  width: 36,
+                  height: 36,
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+          </span>
           )}
         </div>
       </div>
